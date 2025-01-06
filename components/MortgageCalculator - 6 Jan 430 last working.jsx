@@ -228,13 +228,9 @@ const MortgageCalculator = () => {
     if (holdingPeriod > 2) {
       // Long Term Capital Gains (LTCG)
       const purchaseCII = getCIIForDate(purchaseDate);
-      
-      // Project future CII based on historical average annual increase (approximately 5%)
-      const averageAnnualCIIIncrease = 0.043; // 5% annual increase
-      const projectedSaleCII = purchaseCII * Math.pow(1 + averageAnnualCIIIncrease, holdingPeriod);
-      
-      indexationMultiplier = projectedSaleCII / purchaseCII;
-      
+      const saleCII = getLatestCII();
+      indexationMultiplier = saleCII / purchaseCII;
+
       const indexedCost = propCost * indexationMultiplier;
       gains = futureValue - indexedCost;
       taxAmount = Math.max(0, gains * 0.2);
