@@ -37,8 +37,9 @@ const MortgageCalculator = () => {
 
   const parseNumberInput = (value) => {
     if (!value) return 0;
-    return Number(value.toString().replace(/,/g, ''));
+    return parseInt(value.toString().replace(/,/g, ''), 10); // Ensure proper parsing.
   };
+  
 
   const formatIndianCurrency = (amount) => {
     const formatter = new Intl.NumberFormat('en-IN', {
@@ -227,9 +228,13 @@ const MortgageCalculator = () => {
     if (holdingPeriod > 2) {
       // Long Term Capital Gains (LTCG)
       const purchaseCII = getCIIForDate(purchaseDate);
-      const saleCII = getLatestCII();
-      indexationMultiplier = saleCII / purchaseCII;
-
+      
+      // Project future CII based on historical average annual increase (approximately 5%)
+      const averageAnnualCIIIncrease = 0.043; // 5% annual increase
+      const projectedSaleCII = purchaseCII * Math.pow(1 + averageAnnualCIIIncrease, holdingPeriod);
+      
+      indexationMultiplier = projectedSaleCII / purchaseCII;
+      
       const indexedCost = propCost * indexationMultiplier;
       gains = futureValue - indexedCost;
       taxAmount = Math.max(0, gains * 0.2);
@@ -484,6 +489,8 @@ const MortgageCalculator = () => {
                     const newValue = parseNumberInput(e.target.value);
                     if (newValue > 0) {
                       setTotalPropertyCost(newValue);
+                    } else if (e.target.value === '') {
+                      setTotalPropertyCost('');
                     } else {
                       alert('Please enter a valid number greater than zero.');
                     }
@@ -534,22 +541,35 @@ const MortgageCalculator = () => {
                 <div className="space-y-2">
                   <Label>Total Property Cost (₹)</Label>
                   <Input 
-                    type="text" 
-                    value={formatNumberInput(totalPropertyCost)}
-                    onChange={(e) => setTotalPropertyCost(Number(e.target.value))}
-                  />
-                </div>
+                      type="text" 
+                      value={formatNumberInput(totalPropertyCost)}
+                      onChange={(e) => {
+                        const rawValue = e.target.value.replace(/,/g, ''); // Remove commas for raw value
+                        if (/^\d*$/.test(rawValue)) { // Ensure only numeric input
+                          const parsedValue = parseInt(rawValue, 10);
+                          if (!isNaN(parsedValue) && parsedValue > 0) {
+                            setTotalPropertyCost(parsedValue);
+                          } else {
+                            setTotalPropertyCost(''); // Handle empty or invalid input
+                          }
+                        } else {
+                          alert('Please enter numeric values only.');
+                        }
+                      }}
+                    />
+
+                  </div>
                 <div className="space-y-2">
                   <Label>Down Payment (₹)</Label>
                   <Input 
                   type="text" 
-                  value={formatNumberInput(totalPropertyCost)}
+                  value={formatNumberInput(downPayment)}
                   onChange={(e) => {
                     const newValue = parseNumberInput(e.target.value);
-                    if (newValue > 0) {
-                      setTotalPropertyCost(newValue);
-                    } else {
-                      alert('Please enter a valid number greater than zero.');
+                    if (newValue > 0 && newValue <= totalPropertyCost) {
+                      setDownPayment(newValue);
+                    } else if (newValue > totalPropertyCost) {
+                      alert('Down Payment cannot exceed Total Property Cost.');
                     }
                   }}
                 />
@@ -559,16 +579,42 @@ const MortgageCalculator = () => {
                   <Input 
                     type="text" 
                     value={formatNumberInput(monthlyRent)}
-                    onChange={(e) => setMonthlyRent(Number(e.target.value))}
+                    onChange={(e) => {
+                      const rawValue = e.target.value.replace(/,/g, ''); // Remove commas
+                      if (/^\d*$/.test(rawValue)) { // Ensure numeric input
+                        const parsedValue = parseInt(rawValue, 10);
+                        if (!isNaN(parsedValue) && parsedValue >= 0) { // Allow zero as valid input
+                          setMonthlyRent(parsedValue);
+                        } else {
+                          setMonthlyRent(''); // Handle empty input
+                        }
+                      } else {
+                        alert('Please enter numeric values only.');
+                      }
+                    }}
                   />
+
                 </div>
                 <div className="space-y-2">
                   <Label>Monthly Maintenance (₹)</Label>
                   <Input 
                     type="text" 
                     value={formatNumberInput(maintenanceCharges)}
-                    onChange={(e) => setMaintenanceCharges(Number(e.target.value))}
+                    onChange={(e) => {
+                      const rawValue = e.target.value.replace(/,/g, ''); // Remove commas
+                      if (/^\d*$/.test(rawValue)) { // Ensure numeric input
+                        const parsedValue = parseInt(rawValue, 10);
+                        if (!isNaN(parsedValue) && parsedValue >= 0) { // Allow zero as valid input
+                          setMaintenanceCharges(parsedValue);
+                        } else {
+                          setMaintenanceCharges(''); // Handle empty input
+                        }
+                      } else {
+                        alert('Please enter numeric values only.');
+                      }
+                    }}
                   />
+
                 </div>
                 <div className="space-y-2">
                   <Label>Annual Appreciation (%)</Label>
@@ -591,8 +637,21 @@ const MortgageCalculator = () => {
                   <Input 
                     type="text" 
                     value={formatNumberInput(totalIncome)}
-                    onChange={(e) => setTotalIncome(Number(e.target.value))}
+                    onChange={(e) => {
+                      const rawValue = e.target.value.replace(/,/g, ''); // Remove commas
+                      if (/^\d*$/.test(rawValue)) { // Ensure numeric input
+                        const parsedValue = parseInt(rawValue, 10);
+                        if (!isNaN(parsedValue) && parsedValue >= 0) { // Allow zero as valid input
+                          setTotalIncome(parsedValue);
+                        } else {
+                          setTotalIncome(''); // Handle empty input
+                        }
+                      } else {
+                        alert('Please enter numeric values only.');
+                      }
+                    }}
                   />
+
                 </div>
               </div>
 
