@@ -542,10 +542,17 @@ const MortgageCalculator = () => {
                 <div className="space-y-2">
                   <Label>Down Payment (₹)</Label>
                   <Input 
-                    type="text" 
-                    value={formatNumberInput(downPayment)}
-                    onChange={(e) => setDownPayment(Number(e.target.value))}
-                  />
+                  type="text" 
+                  value={formatNumberInput(totalPropertyCost)}
+                  onChange={(e) => {
+                    const newValue = parseNumberInput(e.target.value);
+                    if (newValue > 0) {
+                      setTotalPropertyCost(newValue);
+                    } else {
+                      alert('Please enter a valid number greater than zero.');
+                    }
+                  }}
+                />
                 </div>
                 <div className="space-y-2">
                   <Label>Monthly Rent (₹)</Label>
