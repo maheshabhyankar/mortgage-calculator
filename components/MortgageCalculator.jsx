@@ -480,8 +480,16 @@ const MortgageCalculator = () => {
                 <Input 
                   type="text" 
                   value={formatNumberInput(totalPropertyCost)}
-                  onChange={(e) => setTotalPropertyCost(Number(e.target.value))}
+                  onChange={(e) => {
+                    const newValue = parseNumberInput(e.target.value);
+                    if (newValue > 0) {
+                      setTotalPropertyCost(newValue);
+                    } else {
+                      alert('Please enter a valid number greater than zero.');
+                    }
+                  }}
                 />
+
               </div>
                 <div className="space-y-2">
                   <Label>Stamp Duty (%)</Label>
